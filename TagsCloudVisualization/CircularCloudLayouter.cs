@@ -7,18 +7,20 @@ namespace TagsCloudVisualization
 {
 	internal class CircularCloudLayouter
 	{
+		private Point center;
+
 		public Point Center
 		{
-			get { return Center; }
+			get { return center; }
 			set
 			{
 				if (value.X < 0 || value.Y < 0)
 					throw new ArgumentException("Center point should be non-negative");
-				Center = value;
+				center = value;
 			}
 		}
 
-		public List<Rectangle> PlacedRectangles { get; private set; }
+		public List<Rectangle> PlacedRectangles { get; }
 
 		public CircularCloudLayouter(Point center)
 		{

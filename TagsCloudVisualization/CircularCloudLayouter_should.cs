@@ -33,10 +33,15 @@ namespace TagsCloudVisualization
 
 
 		[TestCase(10, 10)]
+		[TestCase(13, 53)]
 		public void PlaceRectInCenter_IfItIsOne(int x, int y)
 		{
-			cloud.PutNextRectangle(new Size(x, y));
+			var rectangleSize = new Size(x, y);
+			cloud.PutNextRectangle(rectangleSize);
 			cloud.PlacedRectangles.First().Location.Should().Be(cloud.Center);
+			cloud.PlacedRectangles.First().Size.Should().Be(rectangleSize);
 		}
+
+
 	}
 }
