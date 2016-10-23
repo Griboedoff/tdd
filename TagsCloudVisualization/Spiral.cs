@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using NUnit.Framework;
@@ -15,7 +14,7 @@ namespace TagsCloudVisualization
 		private double currentAngle;
 		private double currentRadius;
 
-		public Spiral(Point center, double deltaAngle = 10, double deltaRadius = 1)
+		public Spiral(Point center, double deltaAngle = Math.PI / 90, double deltaRadius = 0.001)
 		{
 			this.center = center;
 			this.deltaAngle = deltaAngle;
@@ -25,15 +24,16 @@ namespace TagsCloudVisualization
 			currentRadius = 0;
 		}
 
-		public IEnumerable<Point> GetNextSpiralPoint()
+		public Point GetNextSpiralPoint()
 		{
-			yield return currentPoint;
+			var prevPoint = currentPoint;
 			currentAngle += deltaAngle;
 			currentRadius += deltaRadius;
 
 			var newX = (int) (currentRadius * Math.Cos(currentAngle) + center.X);
 			var newY = (int) (currentRadius * Math.Sin(currentAngle) + center.Y);
 			currentPoint = new Point(newX, newY);
+			return prevPoint;
 		}
 	}
 
@@ -50,12 +50,12 @@ namespace TagsCloudVisualization
 		{
 			var graphics = e.Graphics;
 			var spiral = new Spiral(center);
-			var i = 100;
-			foreach (var item in spiral.GetNextSpiralPoint())
+			var prev = spiral.GetNextSpiralPoint();
+			for (var i = 0; i < 1000; i++)
 			{
-				if (i-- == 0)
-					break;
-				graphics.DrawRectangle(Pens.Black, item.X, item.Y, 1, 1);
+				var item = spiral.GetNextSpiralPoint();
+				graphics.DrawLine(Pens.Orange, prev, item);
+				prev = item;
 			}
 		}
 	}
