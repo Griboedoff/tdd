@@ -69,10 +69,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="examples\1477283018.png" />
+    <Content Include="examples\1477283605.png" />
     <Content Include="ReadMe.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="examples" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
