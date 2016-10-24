@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 
 namespace TagsCloudVisualization
 {
@@ -31,12 +33,16 @@ namespace TagsCloudVisualization
 			return generatedSizes.OrderByDescending(x => x.Width);
 		}
 
-		private static IEnumerable<Size> GenerateRectangles(int maxSize, int numberOfRectangles, int seed)
+		private static IEnumerable<Size> GenerateRectangles(int maxWidth, int maxHeigth, int numberOfRectangles, int seed)
 		{
 			var generatedSizes = new List<Size>();
 			var rand = new Random(seed);
 			for (var i = 0; i < numberOfRectangles; i++)
-				generatedSizes.Add(new Size(rand.Next(1, maxSize + 1), rand.Next(1, maxSize + 1)));
+			{
+				var width = rand.Next(1, maxWidth + 1);
+				var height = rand.Next(1, maxHeigth + 1);
+				generatedSizes.Add(new Size(width, height));
+			}
 			return generatedSizes.OrderByDescending(x => x.Width + x.Height);
 		}
 
@@ -106,29 +112,30 @@ namespace TagsCloudVisualization
 		public void MakeCloud_AndSaveToExamplesFolder()
 		{
 			var cloud = new CircularCloudLayouter(new Point(500, 500));
-			var squares = GenerateSquares(20, 2000, 10);
+			var squares = GenerateSquares(10, 1000, 10);
+//			var squares = GenerateRectangles(100, 10, 500, 10);
 			foreach (var square in squares)
 				cloud.PutNextRectangle(square);
 			var filename = Path.Combine(
 				TestContext.CurrentContext.TestDirectory,
 				"examples",
-				(int) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds + ".bmp");
+				(int) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds + ".png");
 			var bitmap = cloud.ToBitmap();
-			bitmap.Save(filename);
+			bitmap.Save(filename, ImageFormat.Png);
 		}
 
-//		[TearDown]
-//		public void TearDown()
-//		{
-//			if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
-//			{
-//				var filename = Path.Combine(TestContext.CurrentContext.TestDirectory,
-//					"TestFailures",
-//					TestContext.CurrentContext.Test.MethodName,
-//					TestContext.CurrentContext.Test.ID + ".bmp");
-//				Cloud.ToBitmap().Save(filename);
-//				Console.WriteLine($"bitmap saved to {filename}");
-//			}
-//		}
+		[TearDown]
+		public void TearDown()
+		{
+			if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
+			{
+				var filename = Path.Combine(TestContext.CurrentContext.TestDirectory,
+					"TestFailures",
+					TestContext.CurrentContext.Test.MethodName,
+					TestContext.CurrentContext.Test.ID + ".png");
+				Cloud.ToBitmap().Save(filename, ImageFormat.Png);
+				Console.WriteLine($"bitmap saved to {filename}");
+			}
+		}
 	}
 }

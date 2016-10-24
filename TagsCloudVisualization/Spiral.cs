@@ -14,7 +14,7 @@ namespace TagsCloudVisualization
 		private double currentAngle;
 		private double currentRadius;
 
-		public Spiral(Point center, double deltaAngle = Math.PI / 90, double deltaRadius = 0.001)
+		public Spiral(Point center, double deltaAngle = Math.PI / 180, double deltaRadius = 0.001)
 		{
 			this.center = center;
 			this.deltaAngle = deltaAngle;
