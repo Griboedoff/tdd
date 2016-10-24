@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using NUnit.Framework.Constraints;
 
 namespace TagsCloudVisualization
 {
@@ -15,9 +16,9 @@ namespace TagsCloudVisualization
 			       r1.Right <= r2.Right && r1.Left >= r2.Left && r1.Bottom <= r2.Bottom && r1.Top >= r2.Top;
 		}
 
-		public static bool Contains(this Rectangle r, Point p)
+		public static Point GetCenter(this Rectangle rect)
 		{
-			return p.X <= r.Right && r.Left <= p.X && p.Y <= r.Bottom && p.Y >= r.Top;
+			return rect.Location.Add(new Point(rect.Width / 2, rect.Height / 2));
 		}
 	}
 }

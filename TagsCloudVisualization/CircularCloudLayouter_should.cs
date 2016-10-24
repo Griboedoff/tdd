@@ -13,6 +13,7 @@ namespace TagsCloudVisualization
 	[TestFixture]
 	internal class CircularCloudLayouter_Should
 	{
+		private static int GetCurrentTimeStamp() => (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 		private CircularCloudLayouter Cloud { get; set; }
 
 		[SetUp]
@@ -27,10 +28,10 @@ namespace TagsCloudVisualization
 			var rand = new Random(seed);
 			for (var i = 0; i < numberOfSquares; i++)
 			{
-				var size = rand.Next(1, maxSize + 1);
+				var size = rand.Next(10, maxSize + 1);
 				generatedSizes.Add(new Size(size, size));
 			}
-			return generatedSizes.OrderByDescending(x => x.Width);
+			return generatedSizes;
 		}
 
 		private static IEnumerable<Size> GenerateRectangles(int maxWidth, int maxHeigth, int numberOfRectangles, int seed)
@@ -40,10 +41,24 @@ namespace TagsCloudVisualization
 			for (var i = 0; i < numberOfRectangles; i++)
 			{
 				var width = rand.Next(1, maxWidth + 1);
-				var height = rand.Next(1, maxHeigth + 1);
+				var height = rand.Next(10, maxHeigth + 1);
 				generatedSizes.Add(new Size(width, height));
 			}
-			return generatedSizes.OrderByDescending(x => x.Width + x.Height);
+			return generatedSizes;
+		}
+
+		private static IEnumerable<Size> GenerateWordLikeRectangles(int maxWidth, int maxHeigth, int numberOfRectangles,
+			int seed)
+		{
+			GenerateRectangles(maxWidth, maxHeigth, numberOfRectangles, seed);
+			var result = new List<Size>();
+			while (result.Count < numberOfRectangles)
+			{
+				result = result
+					.Concat(GenerateRectangles(maxWidth, maxHeigth, numberOfRectangles, seed).Where(size => size.Width > size.Height))
+					.ToList();
+			}
+			return result.Take(numberOfRectangles);
 		}
 
 
@@ -58,6 +73,7 @@ namespace TagsCloudVisualization
 		[TestCase(-1, -1)]
 		public void ThrowArgumentException_IfCenterPointIsNegative(int x, int y)
 		{
+			// ReSharper disable once ObjectCreationAsStatement
 			Assert.Throws<ArgumentException>(() => new CircularCloudLayouter(new Point(x, y)));
 		}
 
@@ -73,7 +89,8 @@ namespace TagsCloudVisualization
 		{
 			var rectangleSize = new Size(x, y);
 			Cloud.PutNextRectangle(rectangleSize);
-			Cloud.PlacedRectangles.First().Location.Should().Be(Cloud.Center);
+			var rect = Cloud.PlacedRectangles.First();
+			rect.GetCenter().Should().Be(Cloud.Center);
 			Cloud.PlacedRectangles.First().Size.Should().Be(rectangleSize);
 		}
 
@@ -112,14 +129,15 @@ namespace TagsCloudVisualization
 		public void MakeCloud_AndSaveToExamplesFolder()
 		{
 			var cloud = new CircularCloudLayouter(new Point(500, 500));
-			var squares = GenerateSquares(10, 1000, 10);
-//			var squares = GenerateRectangles(100, 10, 500, 10);
-			foreach (var square in squares)
+			var rects = GenerateSquares(40, 1000, 10);
+//			var rects = GenerateRectangles(100, 30, 500, 10);
+//			var rects = GenerateWordLikeRectangles(100, 30, 500, 10);
+			foreach (var square in rects)
 				cloud.PutNextRectangle(square);
 			var filename = Path.Combine(
 				TestContext.CurrentContext.TestDirectory,
 				"examples",
-				(int) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds + ".png");
+				GetCurrentTimeStamp() + ".png");
 			var bitmap = cloud.ToBitmap();
 			bitmap.Save(filename, ImageFormat.Png);
 		}
@@ -130,9 +148,7 @@ namespace TagsCloudVisualization
 			if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
 			{
 				var filename = Path.Combine(TestContext.CurrentContext.TestDirectory,
-					"TestFailures",
-					TestContext.CurrentContext.Test.MethodName,
-					TestContext.CurrentContext.Test.ID + ".png");
+					string.Join(".", GetCurrentTimeStamp(), TestContext.CurrentContext.Test.MethodName, "png"));
 				Cloud.ToBitmap().Save(filename, ImageFormat.Png);
 				Console.WriteLine($"bitmap saved to {filename}");
 			}
