@@ -70,9 +70,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="examples\1477295794.png" />
-    <Content Include="examples\1477296599.png" />
-    <Content Include="examples\1477296634.png" />
     <Content Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
