@@ -79,7 +79,7 @@ namespace TagsCloudVisualization
 					rectangle = newRectangle;
 				var vectorToCenter = center - new Size(rectangle.GetCenter());
 				newRectangle = TryMove(rectangle, vectorToCenter.SnapByX());
-				newRectangle = TryMove(rectangle, vectorToCenter.SnapByY());
+				newRectangle = TryMove(newRectangle, vectorToCenter.SnapByY());
 			}
 			return rectangle;
 		}
