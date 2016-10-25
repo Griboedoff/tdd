@@ -8,7 +8,7 @@ namespace TagsCloudVisualization
 	internal class CircularCloudLayouter
 	{
 		private Point center;
-		private readonly Spiral spiral;
+		private readonly Spiral.Spiral spiral;
 		private readonly Rectangle cloudBorders;
 
 		public Point Center
@@ -22,15 +22,16 @@ namespace TagsCloudVisualization
 			}
 		}
 
-		public List<Rectangle> PlacedRectangles { get; }
+		public int Count => PlacedRectangles.Count;
+
+		private List<Rectangle> PlacedRectangles { get; }
 
 		private bool IsInValidPosition(Rectangle checkingRect)
-			=> !(PlacedRectangles.Any(rect => rect.IsIntersectedWith(checkingRect) || checkingRect.IsInside(rect))
-			     || !checkingRect.IsInside(cloudBorders));
+			=> !(PlacedRectangles.Any(rect => rect.IntersectsWith(checkingRect)) || !checkingRect.IntersectsWith(cloudBorders));
 
 		public CircularCloudLayouter(Point center)
 		{
-			spiral = new Spiral(center);
+			spiral = new Spiral.Spiral(center);
 			Center = center;
 			cloudBorders = new Rectangle(0, 0, center.X * 2, center.Y * 2);
 			PlacedRectangles = new List<Rectangle>();
@@ -42,26 +43,24 @@ namespace TagsCloudVisualization
 				throw new ArgumentException($"Size must be positive {rectangleSize}");
 
 			var nextSpiralPoint = spiral.GetNextSpiralPoint();
-			var location = new Point(nextSpiralPoint.X - rectangleSize.Width / 2, nextSpiralPoint.Y - rectangleSize.Height / 2);
-
-			var nextRectangle = new Rectangle(
-				location,
-				rectangleSize);
+			var nextRectangle = new Rectangle(GetRectangleCenterLocation(rectangleSize, nextSpiralPoint), rectangleSize);
 
 			while (!IsInValidPosition(nextRectangle))
 			{
 				nextSpiralPoint = spiral.GetNextSpiralPoint();
-				nextRectangle =
-					new Rectangle(
-						new Point(nextSpiralPoint.X - rectangleSize.Width / 2, nextSpiralPoint.Y - rectangleSize.Height / 2),
-						rectangleSize);
+				nextRectangle = new Rectangle(GetRectangleCenterLocation(rectangleSize, nextSpiralPoint), rectangleSize);
 				if (!cloudBorders.Contains(nextSpiralPoint))
 					return Rectangle.Empty;
 			}
+
 			MoveToCenter(ref nextRectangle);
 			PlacedRectangles.Add(nextRectangle);
 			return nextRectangle;
 		}
+
+		private static Point GetRectangleCenterLocation(Size rectangleSize, Point nextSpiralPoint)
+			=> new Point(nextSpiralPoint.X - rectangleSize.Width / 2, nextSpiralPoint.Y - rectangleSize.Height / 2);
+
 
 		private void MoveToCenter(ref Rectangle rect)
 		{
@@ -69,9 +68,9 @@ namespace TagsCloudVisualization
 			var verticalyMoved = true;
 			while (horizontalyMoved || verticalyMoved)
 			{
-				var vectToCenter = center.Sub(new Point(rect.Location.X + rect.Width / 2, rect.Location.Y + rect.Height / 2));
-				horizontalyMoved = TryMove(ref rect, vectToCenter.SnapByX());
-				verticalyMoved = TryMove(ref rect, vectToCenter.SnapByY());
+				var vectorToCenter = center.Sub(new Point(rect.Location.X + rect.Width / 2, rect.Location.Y + rect.Height / 2));
+				horizontalyMoved = TryMove(ref rect, vectorToCenter.SnapByX());
+				verticalyMoved = TryMove(ref rect, vectorToCenter.SnapByY());
 			}
 		}
 

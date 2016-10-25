@@ -59,11 +59,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CircularCloudLayouter.cs" />
-    <Compile Include="CircularCloudLayouter_should.cs" />
+    <Compile Include="CircularCloudLayouter_Should.cs" />
     <Compile Include="PointExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RectangleExtension.cs" />
-    <Compile Include="Spiral.cs" />
+    <Compile Include="Spiral\Spiral.cs" />
+    <Compile Include="Spiral\SpiralVizualizer.cs" />
+    <Compile Include="Spiral\Spiral_Should.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

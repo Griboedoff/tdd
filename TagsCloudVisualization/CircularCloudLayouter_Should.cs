@@ -61,11 +61,20 @@ namespace TagsCloudVisualization
 			return result.Take(numberOfRectangles);
 		}
 
+		private static string GetFileName(IEnumerable<string> additionalPathParts)
+		{
+			var pathParts =
+				new[] {TestContext.CurrentContext.TestDirectory}
+					.Concat(additionalPathParts
+						.Concat(new[] {string.Join(".", GetCurrentTimeStamp(), ".png")}))
+					.ToArray();
+			return Path.Combine(pathParts);
+		}
 
 		[Test]
 		public void BeEmpty_AfterCreation()
 		{
-			Cloud.PlacedRectangles.Should().BeEmpty();
+			Cloud.Count.Should().Be(0);
 		}
 
 		[TestCase(-1, 0)]
@@ -88,10 +97,11 @@ namespace TagsCloudVisualization
 		public void PlaceRectInCenter_IfItIsOne(int x, int y)
 		{
 			var rectangleSize = new Size(x, y);
-			Cloud.PutNextRectangle(rectangleSize);
-			var rect = Cloud.PlacedRectangles.First();
+
+			var rect = Cloud.PutNextRectangle(rectangleSize);
+
 			rect.GetCenter().Should().Be(Cloud.Center);
-			Cloud.PlacedRectangles.First().Size.Should().Be(rectangleSize);
+			rect.Size.Should().Be(rectangleSize);
 		}
 
 		[Test]
@@ -99,18 +109,22 @@ namespace TagsCloudVisualization
 		{
 			var rectangleSize = new Size(10, 12);
 			var rectangleSize2 = new Size(10, 10);
-			Cloud.PutNextRectangle(rectangleSize);
-			Cloud.PutNextRectangle(rectangleSize2);
-			Cloud.PlacedRectangles.Should().HaveCount(2);
-			Cloud.PlacedRectangles[0].IsIntersectedWith(Cloud.PlacedRectangles[1]).Should().BeFalse();
+
+			var rect1 = Cloud.PutNextRectangle(rectangleSize);
+			var rect2 = Cloud.PutNextRectangle(rectangleSize2);
+
+			Cloud.Count.Should().Be(2);
+			rect1.IntersectsWith(rect2).Should().BeFalse();
 		}
 
 		[Test]
 		public void NotPlace_IfRectIsOutsideCloudBorder()
 		{
 			var size = new Size(1000, 10);
+
 			Cloud.PutNextRectangle(size);
-			Cloud.PlacedRectangles.Should().BeEmpty();
+
+			Cloud.Count.Should().Be(0);
 		}
 
 		[TestCase(10, 100)]
@@ -119,9 +133,11 @@ namespace TagsCloudVisualization
 		public void AddManyRectangles(int number, int maxSize)
 		{
 			var squares = GenerateSquares(maxSize, number, 10);
+
 			foreach (var square in squares)
 				Cloud.PutNextRectangle(square);
-			Cloud.PlacedRectangles.Should().HaveCount(number);
+
+			Cloud.Count.Should().Be(number);
 		}
 
 		[Test]
@@ -132,12 +148,11 @@ namespace TagsCloudVisualization
 			var rects = GenerateSquares(40, 1000, 10);
 //			var rects = GenerateRectangles(100, 30, 500, 10);
 //			var rects = GenerateWordLikeRectangles(100, 30, 500, 10);
+
 			foreach (var square in rects)
 				cloud.PutNextRectangle(square);
-			var filename = Path.Combine(
-				TestContext.CurrentContext.TestDirectory,
-				"examples",
-				GetCurrentTimeStamp() + ".png");
+
+			var filename = GetFileName(new[] {"examples"});
 			var bitmap = cloud.ToBitmap();
 			bitmap.Save(filename, ImageFormat.Png);
 		}
@@ -147,8 +162,7 @@ namespace TagsCloudVisualization
 		{
 			if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
 			{
-				var filename = Path.Combine(TestContext.CurrentContext.TestDirectory,
-					string.Join(".", GetCurrentTimeStamp(), TestContext.CurrentContext.Test.MethodName, "png"));
+				var filename = GetFileName(new string[0]);
 				Cloud.ToBitmap().Save(filename, ImageFormat.Png);
 				Console.WriteLine($"bitmap saved to {filename}");
 			}
