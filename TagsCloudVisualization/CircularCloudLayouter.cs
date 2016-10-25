@@ -26,8 +26,11 @@ namespace TagsCloudVisualization
 
 		private List<Rectangle> PlacedRectangles { get; }
 
-		private bool IsInValidPosition(Rectangle checkingRect)
-			=> !(PlacedRectangles.Any(rect => rect.IntersectsWith(checkingRect)) || !checkingRect.IntersectsWith(cloudBorders));
+		private bool IsInValidPosition(Rectangle checkingRectangle)
+			=> !PlacedRectangles.Any(rect => rect.IntersectsWith(checkingRectangle)) && cloudBorders.Contains(checkingRectangle);
+
+		private static Point GetRectangleCenterLocation(Size rectangleSize, Point nextSpiralPoint)
+			=> new Point(nextSpiralPoint.X - rectangleSize.Width / 2, nextSpiralPoint.Y - rectangleSize.Height / 2);
 
 		public CircularCloudLayouter(Point center)
 		{
@@ -42,6 +45,17 @@ namespace TagsCloudVisualization
 			if (rectangleSize.Height <= 0 || rectangleSize.Width <= 0)
 				throw new ArgumentException($"Size must be positive {rectangleSize}");
 
+			var nextRectangle = FindNextRectanglePosition(rectangleSize);
+
+			if (nextRectangle.IsEmpty) return nextRectangle;
+
+			nextRectangle = MoveToCenter(nextRectangle);
+			PlacedRectangles.Add(nextRectangle);
+			return nextRectangle;
+		}
+
+		private Rectangle FindNextRectanglePosition(Size rectangleSize)
+		{
 			var nextSpiralPoint = spiral.GetNextSpiralPoint();
 			var nextRectangle = new Rectangle(GetRectangleCenterLocation(rectangleSize, nextSpiralPoint), rectangleSize);
 
@@ -53,36 +67,30 @@ namespace TagsCloudVisualization
 					return Rectangle.Empty;
 			}
 
-			MoveToCenter(ref nextRectangle);
-			PlacedRectangles.Add(nextRectangle);
 			return nextRectangle;
 		}
 
-		private static Point GetRectangleCenterLocation(Size rectangleSize, Point nextSpiralPoint)
-			=> new Point(nextSpiralPoint.X - rectangleSize.Width / 2, nextSpiralPoint.Y - rectangleSize.Height / 2);
-
-
-		private void MoveToCenter(ref Rectangle rect)
+		private Rectangle MoveToCenter(Rectangle rectangle)
 		{
-			var horizontalyMoved = true;
-			var verticalyMoved = true;
-			while (horizontalyMoved || verticalyMoved)
+			var newRectangle = Rectangle.Empty;
+			while (rectangle != newRectangle)
 			{
-				var vectorToCenter = center.Sub(new Point(rect.Location.X + rect.Width / 2, rect.Location.Y + rect.Height / 2));
-				horizontalyMoved = TryMove(ref rect, vectorToCenter.SnapByX());
-				verticalyMoved = TryMove(ref rect, vectorToCenter.SnapByY());
+				if(!newRectangle.IsEmpty)
+					rectangle = newRectangle;
+				var vectorToCenter = center - new Size(rectangle.GetCenter());
+				newRectangle = TryMove(rectangle, vectorToCenter.SnapByX());
+				newRectangle = TryMove(rectangle, vectorToCenter.SnapByY());
 			}
+			return rectangle;
 		}
 
-		private bool TryMove(ref Rectangle rect, Point shift)
+		private Rectangle TryMove(Rectangle rectangle, Point shift)
 		{
-			if (shift == new Point(0, 0))
-				return false;
-			var newRect = new Rectangle(rect.Location.Add(shift), rect.Size);
+			var newRect = new Rectangle(rectangle.Location + new Size(shift), rectangle.Size);
 			var isInValidPosition = IsInValidPosition(newRect);
 			if (isInValidPosition)
-				rect = newRect;
-			return isInValidPosition;
+				rectangle = newRect;
+			return rectangle;
 		}
 
 		public Bitmap ToBitmap()
@@ -92,7 +100,10 @@ namespace TagsCloudVisualization
 			g.FillRectangle(Brushes.Black, cloudBorders);
 
 			foreach (var rectangle in PlacedRectangles)
+			{
 				g.FillRectangle(Brushes.Aquamarine, rectangle);
+				g.DrawRectangle(Pens.Blue, rectangle);
+			}
 			g.DrawRectangle(Pens.Red, new Rectangle(center, new Size(1, 1)));
 
 			return image;

@@ -59,13 +59,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CircularCloudLayouter.cs" />
-    <Compile Include="CircularCloudLayouter_Should.cs" />
     <Compile Include="PointExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RectangleExtension.cs" />
     <Compile Include="Spiral\Spiral.cs" />
     <Compile Include="Spiral\SpiralVizualizer.cs" />
-    <Compile Include="Spiral\Spiral_Should.cs" />
+    <Compile Include="Tests\CircularCloudLayouter_Should.cs" />
+    <Compile Include="Tests\PointExtensions_Should.cs" />
+    <Compile Include="Tests\Spiral_Should.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -76,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="examples" />
+    <Folder Include="Spiral" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

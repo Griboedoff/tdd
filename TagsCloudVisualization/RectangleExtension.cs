@@ -4,9 +4,6 @@ namespace TagsCloudVisualization
 {
 	public static class RectangleExtension
 	{
-		public static Point GetCenter(this Rectangle rect)
-		{
-			return rect.Location.Add(new Point(rect.Width / 2, rect.Height / 2));
-		}
+		public static Point GetCenter(this Rectangle rect) => rect.Location + new Size(rect.Width / 2, rect.Height / 2);
 	}
 }

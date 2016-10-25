@@ -8,7 +8,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
-namespace TagsCloudVisualization
+namespace TagsCloudVisualization.Tests
 {
 	[TestFixture]
 	internal class CircularCloudLayouter_Should
@@ -129,7 +129,7 @@ namespace TagsCloudVisualization
 
 		[TestCase(10, 100)]
 		[TestCase(100, 20)]
-		[TestCase(1000, 2)]
+		[TestCase(1000, 10)]
 		public void AddManyRectangles(int number, int maxSize)
 		{
 			var squares = GenerateSquares(maxSize, number, 10);
