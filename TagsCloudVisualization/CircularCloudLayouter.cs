@@ -64,7 +64,7 @@ namespace TagsCloudVisualization
 				nextSpiralPoint = spiral.GetNextSpiralPoint();
 				nextRectangle = new Rectangle(GetRectangleCenterLocation(rectangleSize, nextSpiralPoint), rectangleSize);
 				if (!cloudBorders.Contains(nextSpiralPoint))
-					return Rectangle.Empty;
+					throw new ArgumentException("Can't place rectangle because cloud is too small");
 			}
 
 			return nextRectangle;

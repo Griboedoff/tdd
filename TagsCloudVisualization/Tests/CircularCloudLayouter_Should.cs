@@ -92,6 +92,28 @@ namespace TagsCloudVisualization.Tests
 			Assert.Throws<ArgumentException>(() => Cloud.PutNextRectangle(new Size(-10, -10)));
 		}
 
+		[Test]
+		public void ThrowException_IfCloudIsTooSmall()
+		{
+			var size = new Size(1000, 10);
+
+			Assert.Throws<ArgumentException>(() => Cloud.PutNextRectangle(size));
+		}
+
+		[Test]
+		public void ThrowException_IfTooMuchRectangles()
+		{
+			var sizes = GenerateRectangles(100, 100, 5000, 10);
+
+			Assert.Throws<ArgumentException>(() =>
+			{
+				foreach (var size in sizes)
+				{
+					Cloud.PutNextRectangle(size);
+				}
+			});
+		}
+
 		[TestCase(10, 10)]
 		[TestCase(13, 53)]
 		public void PlaceRectInCenter_IfItIsOne(int x, int y)
@@ -117,16 +139,6 @@ namespace TagsCloudVisualization.Tests
 			rect1.IntersectsWith(rect2).Should().BeFalse();
 		}
 
-		[Test]
-		public void NotPlace_IfRectIsOutsideCloudBorder()
-		{
-			var size = new Size(1000, 10);
-
-			Cloud.PutNextRectangle(size);
-
-			Cloud.Count.Should().Be(0);
-		}
-
 		[TestCase(10, 100)]
 		[TestCase(100, 20)]
 		[TestCase(1000, 10)]
@@ -137,7 +149,26 @@ namespace TagsCloudVisualization.Tests
 			foreach (var square in squares)
 				Cloud.PutNextRectangle(square);
 
+
 			Cloud.Count.Should().Be(number);
+		}
+
+		[TestCase(100, 20)]
+		[TestCase(1000, 10)]
+		public void IsCloseToCircleShape_WhenPlacedManyRect(int number, int maxSize)
+		{
+			var squares = GenerateSquares(maxSize, number, 10).ToList();
+
+			var lastPlaced = Rectangle.Empty;
+			foreach (var square in squares)
+				lastPlaced = Cloud.PutNextRectangle(square);
+
+			var totalRectangleSquare = squares.Select(rectangle => rectangle.Height * rectangle.Width).Sum();
+			var lastPlacedCenter = lastPlaced.GetCenter();
+			var radius = Math.Pow(lastPlacedCenter.X - Cloud.Center.X, 2) + Math.Pow(lastPlacedCenter.Y - Cloud.Center.Y, 2);
+			var circleSquare = Math.PI * radius;
+
+			circleSquare.Should().BeInRange(0.9 * totalRectangleSquare, 1.1 * totalRectangleSquare);
 		}
 
 		[Test]
