@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using FluentAssertions;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -176,7 +177,7 @@ namespace TagsCloudVisualization.Tests
 		public void MakeCloud_AndSaveToExamplesFolder()
 		{
 			var cloud = new CircularCloudLayouter(new Point(500, 500));
-			var rects = GenerateSquares(40, 1000, 10);
+			var rects = GenerateSquares(40, 500, 10);
 //			var rects = GenerateRectangles(100, 30, 500, 10);
 //			var rects = GenerateWordLikeRectangles(100, 30, 500, 10);
 
@@ -186,6 +187,13 @@ namespace TagsCloudVisualization.Tests
 			var filename = GetFileName(new[] {"examples"});
 			var bitmap = cloud.ToBitmap();
 			bitmap.Save(filename, ImageFormat.Png);
+			DrawImage(bitmap);
+		}
+
+		private static void DrawImage(Image image)
+		{
+			var form = new ImageForm(image);
+			Application.Run(form);
 		}
 
 		[TearDown]

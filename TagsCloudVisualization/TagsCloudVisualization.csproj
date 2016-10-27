@@ -65,6 +65,7 @@
     <Compile Include="Spiral\Spiral.cs" />
     <Compile Include="Spiral\SpiralVizualizer.cs" />
     <Compile Include="Tests\CircularCloudLayouter_Should.cs" />
+    <Compile Include="Tests\ImageForm.cs" />
     <Compile Include="Tests\PointExtensions_Should.cs" />
     <Compile Include="Tests\Spiral_Should.cs" />
   </ItemGroup>
